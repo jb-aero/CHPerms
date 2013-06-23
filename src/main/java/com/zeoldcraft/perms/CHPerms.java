@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import net.milkbowl.vault.chat.Chat;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -14,6 +16,7 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
@@ -130,6 +133,41 @@ public class CHPerms {
 			} else {
 				throw new ConfigRuntimeException("A permission array was expected", ExceptionType.FormatException, t);
 			}
+		}
+	}
+	
+	static {
+		setupChat();
+	}
+	
+	public static Chat chat = null;
+	private static boolean setupChat() {
+        RegisteredServiceProvider<Chat> chatProvider = Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
+        if (chatProvider != null) {
+            chat = chatProvider.getProvider();
+        }
+
+        return (chat != null);
+    }
+	
+	@api
+	public static class vault_group_prefix extends PermFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			chat.getGroupPrefix(args[1].val(), args[0].val());
+			return null;
+		}
+
+		public String getName() {
+			return "vault_group_prefix";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "string {group, world} Does exactly what you'd think it does. If you have to ask, you're stupid.";
 		}
 	}
 	
