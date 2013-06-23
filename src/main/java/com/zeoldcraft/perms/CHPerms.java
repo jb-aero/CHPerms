@@ -136,10 +136,6 @@ public class CHPerms {
 		}
 	}
 	
-	static {
-		setupChat();
-	}
-	
 	public static Chat chat = null;
 	private static boolean setupChat() {
         RegisteredServiceProvider<Chat> chatProvider = Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
@@ -154,8 +150,10 @@ public class CHPerms {
 	public static class vault_group_prefix extends PermFunction {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			chat.getGroupPrefix(args[1].val(), args[0].val());
-			return null;
+			if (!setupChat()) {
+				throw new ConfigRuntimeException("Could not connect to vault.", ExceptionType.PluginInternalException, t);
+			}
+			return new CString(chat.getGroupPrefix(args[1].val(), args[0].val()), t);
 		}
 
 		public String getName() {
