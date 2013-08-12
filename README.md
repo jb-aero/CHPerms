@@ -7,23 +7,23 @@ An implementation of the bukkit permissions system, controlled by CommandHelper
 
 FUNCTIONS
 =========
-
+```
 unregister_permission()
 Type:  void
 Return:	void
 Args:	permission
 Description: Removes the specified permission if it is registered, otherwise 
 nothing happens.
-
-
+```
+```
 unperm_player()
 Type:	boolean
 Return:	boolean
 Args:	
 Description: Removes the attachment from the player, returns whether anything 
 actually changed.
-
-
+```
+```
 register_permission()
   Type: 	void
   Return: void
@@ -37,8 +37,8 @@ register_permission()
     Children must be null or an array of permission name keys and boolean values. 
     The values given will be the values of the child when the parent is set. This 
     is the equivilent of setting permissions in the server permissions.yml.
-
-
+```
+```
 phas_permission()
   Type: 	boolean
   Return: boolean
@@ -46,8 +46,8 @@ phas_permission()
   Description: 
     Returns whether the target (function user if not given) has a 
     permission, based on the server's built in permission system.
-
-
+```
+```
 hijack_permissions()
   Type: 	void
   Return: void
@@ -57,7 +57,8 @@ hijack_permissions()
     commandhelper hasn't set, and removes the setting from the player sothat the 
     other plugin can't change it anymore. If no player is given, all players are 
     used.
-
+```
+```
 get_permissions()
   Type: 	array
   Return: array
@@ -66,14 +67,16 @@ get_permissions()
     Returns an array of all registered permissions. If
     customOnly is true, only the permissions you have created will be in the array,
     defaults to false.
-
+```
+```
 unset_permission()
   Type: 	void
   Return: void
   Args: 	[player], permission
   Description: 
     Unsets a permission, so only that permission's default will apply.
-
+```
+```
 set_permission
   Type: 	void
   Return: void
@@ -81,3 +84,4 @@ set_permission
   Description: 
     Sets the value of a permission for a player, defaulting to the 
     current user. This overrides permission defaults.
+```
