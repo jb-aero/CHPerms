@@ -18,8 +18,8 @@ import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
@@ -138,11 +138,13 @@ public class CHPerms {
 	
 	public static Chat chat = null;
 	private static boolean setupChat() {
-        RegisteredServiceProvider<Chat> chatProvider = Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
-        if (chatProvider != null) {
-            chat = chatProvider.getProvider();
-        }
-
+		if (chat == null) {
+			RegisteredServiceProvider<Chat> chatProvider
+			= Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
+			if (chatProvider != null) {
+				chat = chatProvider.getProvider();
+			}
+		}
         return (chat != null);
     }
 	
@@ -153,7 +155,7 @@ public class CHPerms {
 			if (!setupChat()) {
 				throw new ConfigRuntimeException("Could not connect to vault.", ExceptionType.PluginInternalException, t);
 			}
-			return new CString(chat.getGroupPrefix(args[1].val(), args[0].val()), t);
+			return new CString(chat.getGroupPrefix(args[0].val(), args[1].val()), t);
 		}
 
 		public String getName() {
@@ -165,7 +167,34 @@ public class CHPerms {
 		}
 
 		public String docs() {
-			return "string {group, world} Does exactly what you'd think it does. If you have to ask, you're stupid.";
+			return "string {world, group} Does exactly what you'd think it does. If you have to ask, you're stupid.";
+		}
+	}
+	
+	@api
+	public static class vault_pgroup extends PermFunction {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if (!setupChat()) {
+				throw new ConfigRuntimeException("Could not connect to vault.", ExceptionType.PluginInternalException, t);
+			}
+			CArray ret = new CArray(t);
+			for (String group : chat.getPlayerGroups(args[0].val(), args[1].val())) {
+				ret.push(new CString(group, t));
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "vault_pgroup";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "array {world, player} Returns an array of the groups the given player is in at the given world.";
 		}
 	}
 	
