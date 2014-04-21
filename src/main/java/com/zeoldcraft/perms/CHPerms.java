@@ -73,7 +73,7 @@ public class CHPerms {
 			ret.set("name", new CString(p.getName(), t), t);
 			Construct description;
 			if (p.getDescription() == null) {
-				description = new CNull(t);
+				description = CNull.NULL(t);
 			} else {
 				description = new CString(p.getDescription(), t);
 			}
@@ -81,7 +81,7 @@ public class CHPerms {
 			ret.set("default", new CString(p.getDefault().name(), t), t);
 			Construct children;
 			if (p.getChildren() == null) {
-				children = new CNull(t);
+				children = CNull.NULL(t);
 			} else {
 				CArray ca = new CArray(t);
 				for (Entry<String, Boolean> perm : p.getChildren().entrySet()) {
@@ -258,7 +258,7 @@ public class CHPerms {
 				throw new ConfigRuntimeException("The given permission already exists", ExceptionType.FormatException, t);
 			}
 			permissions.put(perm.getName(), perm);
-			return new CVoid(t);
+			return CVoid.VOID(t);
 		}
 
 		public String getName() {
@@ -287,7 +287,7 @@ public class CHPerms {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			((PluginManager) Static.getServer().getPluginManager().getHandle()).removePermission(args[0].val());
 			permissions.remove(args[0].val());
-			return new CVoid(t);
+			return CVoid.VOID(t);
 		}
 
 		public String getName() {
@@ -364,7 +364,7 @@ public class CHPerms {
 				attachments.put(player.getName(), player.addAttachment(CommandHelperPlugin.self));
 			}
 			attachments.get(player.getName()).setPermission(perm, value);
-			return new CVoid(t);
+			return CVoid.VOID(t);
 		}
 
 		public String getName() {
@@ -404,7 +404,7 @@ public class CHPerms {
 				attachments.put(player.getName(), player.addAttachment(CommandHelperPlugin.self));
 			}
 			attachments.get(player.getName()).unsetPermission(perm);
-			return new CVoid(t);
+			return CVoid.VOID(t);
 		}
 
 		public String getName() {
@@ -477,7 +477,7 @@ public class CHPerms {
 					hijack(pl);
 				}
 			}
-			return new CVoid(t);
+			return CVoid.VOID(t);
 		}
 
 		public String getName() {
