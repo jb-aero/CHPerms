@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import net.milkbowl.vault.chat.Chat;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -16,10 +14,9 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
 
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
@@ -73,7 +70,7 @@ public class CHPerms {
 			ret.set("name", new CString(p.getName(), t), t);
 			Construct description;
 			if (p.getDescription() == null) {
-				description = new CNull(t);
+				description = new CNull;
 			} else {
 				description = new CString(p.getDescription(), t);
 			}
@@ -81,7 +78,7 @@ public class CHPerms {
 			ret.set("default", new CString(p.getDefault().name(), t), t);
 			Construct children;
 			if (p.getChildren() == null) {
-				children = new CNull(t);
+				children = new CNull;
 			} else {
 				CArray ca = new CArray(t);
 				for (Entry<String, Boolean> perm : p.getChildren().entrySet()) {
@@ -133,68 +130,6 @@ public class CHPerms {
 			} else {
 				throw new ConfigRuntimeException("A permission array was expected", ExceptionType.FormatException, t);
 			}
-		}
-	}
-	
-	public static Chat chat = null;
-	private static boolean setupChat() {
-		if (chat == null) {
-			RegisteredServiceProvider<Chat> chatProvider
-			= Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
-			if (chatProvider != null) {
-				chat = chatProvider.getProvider();
-			}
-		}
-        return (chat != null);
-    }
-	
-	@api
-	public static class vault_group_prefix extends PermFunction {
-
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (!setupChat()) {
-				throw new ConfigRuntimeException("Could not connect to vault.", ExceptionType.PluginInternalException, t);
-			}
-			return new CString(chat.getGroupPrefix(args[0].val(), args[1].val()), t);
-		}
-
-		public String getName() {
-			return "vault_group_prefix";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{2};
-		}
-
-		public String docs() {
-			return "string {world, group} Does exactly what you'd think it does. If you have to ask, you're stupid.";
-		}
-	}
-	
-	@api
-	public static class vault_pgroup extends PermFunction {
-
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (!setupChat()) {
-				throw new ConfigRuntimeException("Could not connect to vault.", ExceptionType.PluginInternalException, t);
-			}
-			CArray ret = new CArray(t);
-			for (String group : chat.getPlayerGroups(args[0].val(), args[1].val())) {
-				ret.push(new CString(group, t));
-			}
-			return ret;
-		}
-
-		public String getName() {
-			return "vault_pgroup";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{2};
-		}
-
-		public String docs() {
-			return "array {world, player} Returns an array of the groups the given player is in at the given world.";
 		}
 	}
 	
@@ -258,7 +193,7 @@ public class CHPerms {
 				throw new ConfigRuntimeException("The given permission already exists", ExceptionType.FormatException, t);
 			}
 			permissions.put(perm.getName(), perm);
-			return new CVoid(t);
+			return new CVoid.VOID;
 		}
 
 		public String getName() {
@@ -287,7 +222,7 @@ public class CHPerms {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			((PluginManager) Static.getServer().getPluginManager().getHandle()).removePermission(args[0].val());
 			permissions.remove(args[0].val());
-			return new CVoid(t);
+			return new CVoid.VOID;
 		}
 
 		public String getName() {
@@ -364,7 +299,7 @@ public class CHPerms {
 				attachments.put(player.getName(), player.addAttachment(CommandHelperPlugin.self));
 			}
 			attachments.get(player.getName()).setPermission(perm, value);
-			return new CVoid(t);
+			return new CVoid.VOID;
 		}
 
 		public String getName() {
@@ -404,7 +339,7 @@ public class CHPerms {
 				attachments.put(player.getName(), player.addAttachment(CommandHelperPlugin.self));
 			}
 			attachments.get(player.getName()).unsetPermission(perm);
-			return new CVoid(t);
+			return new CVoid.VOID;
 		}
 
 		public String getName() {
@@ -477,7 +412,7 @@ public class CHPerms {
 					hijack(pl);
 				}
 			}
-			return new CVoid(t);
+			return new CVoid.VOID;
 		}
 
 		public String getName() {
