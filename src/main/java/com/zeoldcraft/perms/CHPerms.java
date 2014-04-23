@@ -457,7 +457,7 @@ public class CHPerms {
 			for (PermissionAttachmentInfo pa : pl.getEffectivePermissions()) {
 				if (!checked.contains(pa.getAttachment()) && pa.getAttachment().getPlugin() != CommandHelperPlugin.self) {
 					for (Entry<String, Boolean> perm : pa.getAttachment().getPermissions().entrySet()) {
-						if (!pla.getPermissions().stringKeySet().contains(perm.getKey())) {
+						if (!pla.getPermissions().keySet().contains(perm.getKey())) {
 							pla.setPermission(perm.getKey(), perm.getValue());
 						}
 						pa.getAttachment().unsetPermission(perm.getKey());
