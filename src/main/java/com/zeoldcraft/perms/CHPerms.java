@@ -85,7 +85,7 @@ public class CHPerms {
 			} else {
 				CArray ca = new CArray(t);
 				for (Entry<String, Boolean> perm : p.getChildren().entrySet()) {
-					ca.set(perm.getKey(), new CBoolean(perm.getValue(), t), t);
+					ca.set( perm.getKey(), CBoolean.get( perm.getValue() ), t);
 				}
 				children = ca;
 			}
@@ -322,7 +322,7 @@ public class CHPerms {
 				throw new ConfigRuntimeException("No commandsender was given", ExceptionType.NullPointerException, t);
 			}
 			
-			return new CBoolean(((CommandSender) mcs.getHandle()).hasPermission(perm), t);
+			return CBoolean.get((( CommandSender ) mcs.getHandle() ).hasPermission( perm ));
 		}
 
 		public String getName() {
@@ -431,7 +431,7 @@ public class CHPerms {
 				success = attachments.get(player).remove();
 				attachments.remove(player);
 			}
-			return new CBoolean(success, t);
+			return CBoolean.get( success );
 		}
 
 		public String getName() {
