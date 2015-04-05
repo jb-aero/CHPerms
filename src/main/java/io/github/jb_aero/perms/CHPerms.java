@@ -1,28 +1,10 @@
-package com.zeoldcraft.perms;
+package io.github.jb_aero.perms;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Map.Entry;
-
-import net.milkbowl.vault.chat.Chat;
-
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.permissions.PermissionDefault;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
-
-import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHVersion;
@@ -39,34 +21,53 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.AbstractFunction;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import net.milkbowl.vault.chat.Chat;
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class CHPerms {
 
-	private static Map<String,PermissionAttachment> attachments = new HashMap<String,PermissionAttachment>();
-	private static Map<String,Permission> permissions = new HashMap<String,Permission>();
-	
+	private static Map<String, PermissionAttachment> attachments = new HashMap<String, PermissionAttachment>();
+	private static Map<String, Permission> permissions = new HashMap<String, Permission>();
+
 	public static PermissionAttachment getAttachment(Player player) {
 		if (!attachments.containsKey(player.getName())) {
 			attachments.put(player.getName(), player.addAttachment(CommandHelperPlugin.self));
 		}
 		return attachments.get(player.getName());
 	}
-	
+
 	public abstract static class PermFunction extends AbstractFunction {
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
 		}
+
 		public boolean isRestricted() {
 			return true;
 		}
+
 		public Boolean runAsync() {
 			return false;
 		}
+
 		public Version since() {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	public static class Convertor {
 		public static CArray permission(Permission p, Target t) {
 			CArray ret = new CArray(t);
@@ -85,19 +86,19 @@ public class CHPerms {
 			} else {
 				CArray ca = new CArray(t);
 				for (Entry<String, Boolean> perm : p.getChildren().entrySet()) {
-					ca.set( perm.getKey(), CBoolean.get( perm.getValue() ), t);
+					ca.set(perm.getKey(), CBoolean.get(perm.getValue()), t);
 				}
 				children = ca;
 			}
 			ret.set("children", children, t);
 			return ret;
 		}
-		
+
 		public static Permission permission(Construct c, Target t) {
 			if (c instanceof CArray) {
 				CArray ca = (CArray) c;
 				String description = null;
-				Map<String,Boolean> children = null;
+				Map<String, Boolean> children = null;
 				PermissionDefault def = Permission.DEFAULT_PERMISSION;
 				String name;
 				if (ca.containsKey("name")) {
@@ -135,19 +136,20 @@ public class CHPerms {
 			}
 		}
 	}
-	
+
 	public static Chat chat = null;
+
 	private static boolean setupChat() {
 		if (chat == null) {
 			RegisteredServiceProvider<Chat> chatProvider
-			= Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
+					= Bukkit.getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
 			if (chatProvider != null) {
 				chat = chatProvider.getProvider();
 			}
 		}
-        return (chat != null);
-    }
-	
+		return (chat != null);
+	}
+
 	@api
 	public static class vault_group_prefix extends PermFunction {
 
@@ -170,7 +172,7 @@ public class CHPerms {
 			return "string {world, group} Does exactly what you'd think it does. If you have to ask, you're stupid.";
 		}
 	}
-	
+
 	@api
 	public static class vault_pgroup extends PermFunction {
 
@@ -197,7 +199,7 @@ public class CHPerms {
 			return "array {world, player} Returns an array of the groups the given player is in at the given world.";
 		}
 	}
-	
+
 	@api
 	public static class get_permissions extends PermFunction {
 
@@ -233,7 +235,7 @@ public class CHPerms {
 					+ " only the permissions you have created will be in the array, defaults to false.";
 		}
 	}
-	
+
 	@api
 	public static class register_permission extends PermFunction {
 
@@ -241,7 +243,7 @@ public class CHPerms {
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
 		}
-		
+
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean overwrite = false;
 			if (args.length == 2) {
@@ -280,7 +282,7 @@ public class CHPerms {
 					+ " This is the equivilent of setting permissions in the server permissions.yml.";
 		}
 	}
-	
+
 	@api
 	public static class unregister_permission extends PermFunction {
 
@@ -302,12 +304,12 @@ public class CHPerms {
 			return "void {permission} Removes the specified permission if it is registered, otherwise nothing happens.";
 		}
 	}
-	
-	@api(environments={CommandHelperEnvironment.class})
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class phas_permission extends PermFunction {
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+							  Construct... args) throws ConfigRuntimeException {
 			MCCommandSender mcs;
 			String perm;
 			if (args.length == 1) {
@@ -317,12 +319,12 @@ public class CHPerms {
 				mcs = Static.GetPlayer(args[0], t);
 				perm = args[1].val();
 			}
-			
+
 			if (mcs == null) {
 				throw new ConfigRuntimeException("No commandsender was given", ExceptionType.NullPointerException, t);
 			}
-			
-			return CBoolean.get((( CommandSender ) mcs.getHandle() ).hasPermission( perm ));
+
+			return CBoolean.get(((CommandSender) mcs.getHandle()).hasPermission(perm));
 		}
 
 		public String getName() {
@@ -338,8 +340,8 @@ public class CHPerms {
 					+ " based on the server's built in permission system.";
 		}
 	}
-	
-	@api(environments={CommandHelperEnvironment.class})
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_permission extends PermFunction {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -380,12 +382,12 @@ public class CHPerms {
 					+ " defaulting to the current user. This overrides permission defaults.";
 		}
 	}
-	
+
 	@api
 	public static class unset_permission extends PermFunction {
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+							  Construct... args) throws ConfigRuntimeException {
 			MCCommandSender mcs;
 			String perm;
 			if (args.length == 1) {
@@ -419,19 +421,19 @@ public class CHPerms {
 			return "void {[player], permission} Unsets a permission, so only that permission's default will apply.";
 		}
 	}
-	
+
 	@api
 	public static class unperm_player extends PermFunction {
 
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+							  Construct... args) throws ConfigRuntimeException {
 			String player = args[0].val();
 			boolean success = false;
 			if (attachments.containsKey(player)) {
 				success = attachments.get(player).remove();
 				attachments.remove(player);
 			}
-			return CBoolean.get( success );
+			return CBoolean.get(success);
 		}
 
 		public String getName() {
@@ -447,7 +449,7 @@ public class CHPerms {
 			return "boolean {} Removes the attachment from the player, returns whether anything actually changed.";
 		}
 	}
-	
+
 	@api
 	public static class hijack_permissions extends PermFunction {
 
@@ -455,7 +457,8 @@ public class CHPerms {
 			List<PermissionAttachment> checked = new ArrayList<PermissionAttachment>();
 			PermissionAttachment pla = getAttachment(pl);
 			for (PermissionAttachmentInfo pa : pl.getEffectivePermissions()) {
-				if (!checked.contains(pa.getAttachment()) && pa.getAttachment().getPlugin() != CommandHelperPlugin.self) {
+				if (!checked.contains(pa.getAttachment())
+						&& pa.getAttachment().getPlugin() != CommandHelperPlugin.self) {
 					for (Entry<String, Boolean> perm : pa.getAttachment().getPermissions().entrySet()) {
 						if (!pla.getPermissions().keySet().contains(perm.getKey())) {
 							pla.setPermission(perm.getKey(), perm.getValue());
@@ -467,9 +470,9 @@ public class CHPerms {
 				checked.add(pa.getAttachment());
 			}
 		}
-		
+
 		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+							  Construct... args) throws ConfigRuntimeException {
 			if (args.length == 1) {
 				hijack(((BukkitMCPlayer) Static.GetPlayer(args[0], t))._Player());
 			} else {
