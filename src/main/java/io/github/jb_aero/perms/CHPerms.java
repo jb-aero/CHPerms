@@ -32,8 +32,10 @@ import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -380,6 +382,68 @@ public class CHPerms {
 		public String docs() {
 			return "void {[player], permission, boolean} Sets the value of a permission for a player,"
 					+ " defaulting to the current user. This overrides permission defaults.";
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_permissions extends PermFunction {
+
+		private Field pField;
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCCommandSender mcs;
+			CArray cperms;
+			if (args.length == 1) {
+				mcs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				if (!(mcs instanceof MCPlayer)) {
+					throw new ConfigRuntimeException("Only players supported at this time",
+							ExceptionType.PlayerOfflineException, t);
+				}
+				cperms = Static.getArray(args[0], t);
+			} else {
+				mcs = Static.GetPlayer(args[0], t);
+				cperms = Static.getArray(args[1], t);
+			}
+			Player player = (Player) mcs.getHandle();
+			if (!attachments.containsKey(player.getName())) {
+				attachments.put(player.getName(), player.addAttachment(CommandHelperPlugin.self));
+			}
+			PermissionAttachment attachment = attachments.get(player.getName());
+
+			Map<String, Boolean> perms = new LinkedHashMap<String, Boolean>();
+			for(String key : cperms.stringKeySet()) {
+				perms.put(key, Static.getBoolean(cperms.get(key, t)));
+			}
+
+			Map<String, Boolean> permissions;
+			try {
+				if (pField == null) {
+					pField = PermissionAttachment.class.getDeclaredField("permissions");
+					pField.setAccessible(true);
+				}
+				permissions = (Map<String, Boolean>) pField.get(attachment);
+			} catch (Exception e) {
+				throw new ConfigRuntimeException("Error trying to make permissions accessible in attachment",
+						ExceptionType.ReadOnlyException, t);
+			}
+			permissions.clear();
+			permissions.putAll(perms);
+			attachment.getPermissible().recalculatePermissions();
+			return CVoid.VOID;
+		}
+
+		public String getName() {
+			return "set_permissions";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {[player], permission(s)} Sets an array of permissions at once before"
+					+ " recalculating permissions for player. Permissions must be an array in the format"
+					+ " array('perm.node': true). This overrides permission defaults.";
 		}
 	}
 
