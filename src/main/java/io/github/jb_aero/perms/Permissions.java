@@ -5,11 +5,18 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.AbstractFunction;
-import com.laytonsmith.core.functions.Exceptions;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
@@ -57,16 +64,14 @@ public class Permissions {
 				if (ca.containsKey("name")) {
 					name = ca.get("name", t).val();
 				} else {
-					throw new ConfigRuntimeException("The array did not contain key 'name'",
-							Exceptions.ExceptionType.FormatException, t);
+					throw new CREFormatException("The array did not contain key 'name'", t);
 				}
 				if (ca.containsKey("default") && !(ca.get("default", t) instanceof CNull)) {
 					try {
 						def = PermissionDefault.valueOf(ca.get("default", t).val());
 					} catch (IllegalArgumentException iae) {
-						throw new ConfigRuntimeException("Default must be one of: "
-								+ StringUtils.Join(PermissionDefault.values(), ", ", ", or "),
-								Exceptions.ExceptionType.FormatException, t);
+						throw new CREFormatException("Default must be one of: "
+								+ StringUtils.Join(PermissionDefault.values(), ", ", ", or "), t);
 					}
 				}
 				if (ca.containsKey("description") && !(ca.get("description", t) instanceof CNull)) {
@@ -79,20 +84,20 @@ public class Permissions {
 							children.put(key, Static.getBoolean(ca));
 						}
 					} else {
-						throw new ConfigRuntimeException("Key children was expected to be an array",
-								Exceptions.ExceptionType.FormatException, t);
+						throw new CREFormatException("Key children was expected to be an array", t);
 					}
 				}
 				return new Permission(name, description, def, children);
 			} else {
-				throw new ConfigRuntimeException("A permission array was expected", Exceptions.ExceptionType.FormatException, t);
+				throw new CREFormatException("A permission array was expected", t);
 			}
 		}
 	}
 
 	public abstract static class PermFunction extends AbstractFunction {
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{};
+
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		public boolean isRestricted() {
@@ -148,8 +153,8 @@ public class Permissions {
 	public static class register_permission extends PermFunction {
 
 		@Override
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.FormatException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -165,7 +170,7 @@ public class Permissions {
 			try {
 				pm.addPermission(perm);
 			} catch (IllegalArgumentException iae) {
-				throw new ConfigRuntimeException("The given permission already exists", Exceptions.ExceptionType.FormatException, t);
+				throw new CREFormatException("The given permission already exists", t);
 			}
 			permissions.put(perm.getName(), perm);
 			return CVoid.VOID;

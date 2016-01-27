@@ -15,9 +15,12 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
+import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.AbstractFunction;
-import com.laytonsmith.core.functions.Exceptions;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -43,8 +46,8 @@ public class PlayerPermissions {
 	}
 
 	public abstract static class PlayerPermFunction extends AbstractFunction {
-		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
 		}
 
 		public boolean isRestricted() {
@@ -76,7 +79,7 @@ public class PlayerPermissions {
 			}
 
 			if (mcs == null) {
-				throw new ConfigRuntimeException("No commandsender was given", Exceptions.ExceptionType.NullPointerException, t);
+				throw new CRENullPointerException("No commandsender was given", t);
 			}
 
 			return CBoolean.get(((CommandSender) mcs.getHandle()).hasPermission(perm));
@@ -106,8 +109,7 @@ public class PlayerPermissions {
 			if (args.length == 2) {
 				mcs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				if (!(mcs instanceof MCPlayer)) {
-					throw new ConfigRuntimeException("Only players supported at this time",
-							Exceptions.ExceptionType.PlayerOfflineException, t);
+					throw new CREPlayerOfflineException("Only players supported at this time", t);
 				}
 				perm = args[0].val();
 				value = Static.getBoolean(args[1]);
@@ -149,8 +151,7 @@ public class PlayerPermissions {
 			if (args.length == 1) {
 				mcs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				if (!(mcs instanceof MCPlayer)) {
-					throw new ConfigRuntimeException("Only players supported at this time",
-							Exceptions.ExceptionType.PlayerOfflineException, t);
+					throw new CREPlayerOfflineException("Only players supported at this time", t);
 				}
 				cperms = Static.getArray(args[0], t);
 			} else {
@@ -176,8 +177,7 @@ public class PlayerPermissions {
 				}
 				permissions = (Map<String, Boolean>) pField.get(attachment);
 			} catch (Exception e) {
-				throw new ConfigRuntimeException("Error trying to make permissions accessible in attachment",
-						Exceptions.ExceptionType.ReadOnlyException, t);
+				throw new CREReadOnlyException("Error trying to make permissions accessible in attachment", t);
 			}
 			permissions.clear();
 			permissions.putAll(perms);
@@ -210,8 +210,7 @@ public class PlayerPermissions {
 			if (args.length == 1) {
 				mcs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				if (!(mcs instanceof MCPlayer)) {
-					throw new ConfigRuntimeException("Only players supported at this time",
-							Exceptions.ExceptionType.PlayerOfflineException, t);
+					throw new CREPlayerOfflineException("Only players supported at this time", t);
 				}
 				perm = args[0].val();
 			} else {

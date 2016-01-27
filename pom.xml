@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.zeoldcraft</groupId>
   <artifactId>CHPerms</artifactId>
-  <version>1.0.1</version>
+  <version>2.0.0</version>
   <name>CHPerms</name>
   <description>An implementation of the bukkit permissions system, controlled by CommandHelper</description>
 
@@ -30,7 +30,7 @@
 	<dependency>
 	  <groupId>com.sk89q</groupId>
 	  <artifactId>commandhelper</artifactId>
-	  <version>3.3.1-SNAPSHOT</version>
+      <version>3.3.2-SNAPSHOT</version>
 	</dependency>
   </dependencies>
 

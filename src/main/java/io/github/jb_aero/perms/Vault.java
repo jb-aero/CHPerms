@@ -8,9 +8,10 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.AbstractFunction;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -31,8 +32,8 @@ public class Vault {
 	}
 
 	public abstract static class VaultFunction extends AbstractFunction {
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PluginInternalException};
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREPluginInternalException.class};
 		}
 
 		public boolean isRestricted() {
@@ -53,7 +54,7 @@ public class Vault {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (!setupChat()) {
-				throw new ConfigRuntimeException("Could not connect to vault.", ExceptionType.PluginInternalException, t);
+				throw new CREPluginInternalException("Could not connect to vault.", t);
 			}
 			return new CString(chat.getGroupPrefix(args[0].val(), args[1].val()), t);
 		}
@@ -76,11 +77,11 @@ public class Vault {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (!setupChat()) {
-				throw new ConfigRuntimeException("Could not connect to vault.", ExceptionType.PluginInternalException, t);
+				throw new CREPluginInternalException("Could not connect to vault.", t);
 			}
 			CArray ret = new CArray(t);
 			for (String group : chat.getPlayerGroups(args[0].val(), args[1].val())) {
-				ret.push(new CString(group, t));
+				ret.push(new CString(group, t), t);
 			}
 			return ret;
 		}
