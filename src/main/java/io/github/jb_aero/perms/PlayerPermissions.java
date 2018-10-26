@@ -182,6 +182,11 @@ public class PlayerPermissions {
 			permissions.clear();
 			permissions.putAll(perms);
 			attachment.getPermissible().recalculatePermissions();
+			try {
+				player.updateCommands();
+			} catch(NoSuchMethodError ex) {
+				// probably prior to 1.13
+			}
 			return CVoid.VOID;
 		}
 
