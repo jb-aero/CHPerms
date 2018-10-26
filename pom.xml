@@ -21,7 +21,7 @@
 	<dependency>
 	  <groupId>com.sk89q</groupId>
 	  <artifactId>commandhelper</artifactId>
-      <version>3.3.2-SNAPSHOT</version>
+      <version>3.3.3-SNAPSHOT</version>
 	</dependency>
   </dependencies>
 
