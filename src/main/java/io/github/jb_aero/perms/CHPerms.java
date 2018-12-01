@@ -9,7 +9,7 @@ import com.laytonsmith.core.extensions.MSExtension;
 public class CHPerms extends AbstractExtension {
 
 	public Version getVersion() {
-		return new SimpleVersion(2, 0, 0);
+		return new SimpleVersion(3, 0, 1);
 	}
 
 	@Override

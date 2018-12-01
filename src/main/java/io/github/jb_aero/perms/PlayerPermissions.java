@@ -6,12 +6,11 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -21,6 +20,7 @@ import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.AbstractFunction;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -59,15 +59,14 @@ public class PlayerPermissions {
 		}
 
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class phas_permission extends PlayerPermFunction {
 
-		public Construct exec(Target t, Environment environment,
-							  Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender mcs;
 			String perm;
 			if (args.length == 1) {
@@ -102,7 +101,7 @@ public class PlayerPermissions {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_permission extends PlayerPermFunction {
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender mcs;
 			String perm;
 			boolean value;
@@ -112,11 +111,11 @@ public class PlayerPermissions {
 					throw new CREPlayerOfflineException("Only players supported at this time", t);
 				}
 				perm = args[0].val();
-				value = Static.getBoolean(args[1]);
+				value = Static.getBoolean(args[1], t);
 			} else {
 				mcs = Static.GetPlayer(args[0], t);
 				perm = args[1].val();
-				value = Static.getBoolean(args[2]);
+				value = Static.getBoolean(args[2], t);
 			}
 			Player player = (Player) mcs.getHandle();
 			if (!attachments.containsKey(player.getName())) {
@@ -145,7 +144,7 @@ public class PlayerPermissions {
 
 		private Field pField;
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender mcs;
 			CArray cperms;
 			if (args.length == 1) {
@@ -166,7 +165,7 @@ public class PlayerPermissions {
 
 			Map<String, Boolean> perms = new LinkedHashMap<String, Boolean>();
 			for(String key : cperms.stringKeySet()) {
-				perms.put(key, Static.getBoolean(cperms.get(key, t)));
+				perms.put(key, Static.getBoolean(cperms.get(key, t), t));
 			}
 
 			Map<String, Boolean> permissions;
@@ -182,11 +181,7 @@ public class PlayerPermissions {
 			permissions.clear();
 			permissions.putAll(perms);
 			attachment.getPermissible().recalculatePermissions();
-			try {
-				player.updateCommands();
-			} catch(NoSuchMethodError ex) {
-				// probably prior to 1.13
-			}
+			player.updateCommands();
 			return CVoid.VOID;
 		}
 
@@ -208,8 +203,7 @@ public class PlayerPermissions {
 	@api
 	public static class unset_permission extends PlayerPermFunction {
 
-		public Construct exec(Target t, Environment environment,
-							  Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender mcs;
 			String perm;
 			if (args.length == 1) {
@@ -246,8 +240,7 @@ public class PlayerPermissions {
 	@api
 	public static class unperm_player extends PlayerPermFunction {
 
-		public Construct exec(Target t, Environment environment,
-							  Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String player = args[0].val();
 			boolean success = false;
 			if (attachments.containsKey(player)) {
@@ -291,8 +284,7 @@ public class PlayerPermissions {
 			}
 		}
 
-		public Construct exec(Target t, Environment environment,
-							  Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (args.length == 1) {
 				hijack(((BukkitMCPlayer) Static.GetPlayer(args[0], t))._Player());
 			} else {

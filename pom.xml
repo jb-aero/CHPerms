@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.zeoldcraft</groupId>
   <artifactId>CHPerms</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1</version>
   <name>CHPerms</name>
   <description>An implementation of the bukkit permissions system, controlled by CommandHelper</description>
 
@@ -11,18 +11,18 @@
   </properties>
 
   <repositories>
-	<repository>
-	  <id>sk89q-mvn2</id>
-	  <url>http://mvn2.sk89q.com/repo</url>
-	</repository>
+    <repository>
+      <id>sk89q-repo</id>
+      <url>http://maven.sk89q.com/repo</url>
+    </repository>
   </repositories>
 
   <dependencies>
-	<dependency>
-	  <groupId>com.sk89q</groupId>
-	  <artifactId>commandhelper</artifactId>
-      <version>3.3.3-SNAPSHOT</version>
-	</dependency>
+    <dependency>
+      <groupId>com.sk89q</groupId>
+      <artifactId>commandhelper</artifactId>
+      <version>3.3.4-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>

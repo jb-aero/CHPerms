@@ -4,9 +4,8 @@ CHPerms
 An implementation of the Bukkit permissions system, controlled by CommandHelper
 
 Download the correct version for your version of CommandHelper:
-<br>[CH 3.3.1-Snapshot](https://letsbuild.net/jenkins/job/CHPerms/12/) (Old version)
-<br>[CH 3.3.1 (Release)](https://letsbuild.net/jenkins/job/CHPerms/13/) (You probably want this one)
-<br>[CH 3.3.2-Snapshot](https://letsbuild.net/jenkins/job/CHPerms/lastSuccessfulBuild/) (Dev builds)
+<br>[CHPerms 3.0.0](https://letsbuild.net/jenkins/job/CHPerms/2/) (CommandHelper 3.3.3)
+<br>[CHPerms 3.0.1](https://letsbuild.net/jenkins/job/CHPerms/5/) (CommandHelper 3.3.4)
 
 PERMISSION FUNCTIONS
 =========
