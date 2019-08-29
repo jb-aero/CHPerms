@@ -1,14 +1,11 @@
 package io.github.jb_aero.perms;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -18,7 +15,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.AbstractFunction;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 
 import java.util.HashMap;
@@ -27,72 +23,6 @@ import java.util.Map;
 public class Permissions {
 
 	private static Map<String, Permission> permissions = new HashMap<String, Permission>();
-
-	public static class Convertor {
-		public static CArray permission(Permission p, Target t) {
-			CArray ret = new CArray(t);
-			ret.set("name", new CString(p.getName(), t), t);
-			Mixed description;
-			if (p.getDescription() == null) {
-				description = CNull.NULL;
-			} else {
-				description = new CString(p.getDescription(), t);
-			}
-			ret.set("description", description, t);
-			ret.set("default", new CString(p.getDefault().name(), t), t);
-			Mixed children;
-			if (p.getChildren() == null) {
-				children = CNull.NULL;
-			} else {
-				CArray ca = new CArray(t);
-				for (Map.Entry<String, Boolean> perm : p.getChildren().entrySet()) {
-					ca.set(perm.getKey(), CBoolean.get(perm.getValue()), t);
-				}
-				children = ca;
-			}
-			ret.set("children", children, t);
-			return ret;
-		}
-
-		public static Permission permission(Mixed c, Target t) {
-			if (c instanceof CArray) {
-				CArray ca = (CArray) c;
-				String description = null;
-				Map<String, Boolean> children = null;
-				PermissionDefault def = Permission.DEFAULT_PERMISSION;
-				String name;
-				if (ca.containsKey("name")) {
-					name = ca.get("name", t).val();
-				} else {
-					throw new CREFormatException("The array did not contain key 'name'", t);
-				}
-				if (ca.containsKey("default") && !(ca.get("default", t) instanceof CNull)) {
-					try {
-						def = PermissionDefault.valueOf(ca.get("default", t).val());
-					} catch (IllegalArgumentException iae) {
-						throw new CREFormatException("Default must be one of: "
-								+ StringUtils.Join(PermissionDefault.values(), ", ", ", or "), t);
-					}
-				}
-				if (ca.containsKey("description") && !(ca.get("description", t) instanceof CNull)) {
-					description = ca.get("description", t).val();
-				}
-				if (ca.containsKey("children") && !(ca.get("children", t) instanceof CNull)) {
-					if (ca.get("children", t) instanceof CArray) {
-						children = new HashMap<String, Boolean>();
-						for (String key : ((CArray) ca.get("children", t)).stringKeySet()) {
-							children.put(key, Static.getBoolean(ca, t));
-						}
-					} else {
-						throw new CREFormatException("Key children was expected to be an array", t);
-					}
-				}
-				return new Permission(name, description, def, children);
-			} else {
-				throw new CREFormatException("A permission array was expected", t);
-			}
-		}
-	}
 
 	public abstract static class PermFunction extends AbstractFunction {
 
@@ -120,16 +50,16 @@ public class Permissions {
 			PluginManager pm = (PluginManager) Static.getServer().getPluginManager().getHandle();
 			boolean customOnly = false;
 			if (args.length == 1) {
-				customOnly = Static.getBoolean(args[0], t);
+				customOnly = ArgumentValidation.getBooleanObject(args[0], t);
 			}
 			CArray ret = new CArray(t);
 			if (customOnly) {
 				for (Map.Entry<String, Permission> entry : permissions.entrySet()) {
-					ret.set(entry.getKey(), Convertor.permission(entry.getValue(), t), t);
+					ret.set(entry.getKey(), PermissionConvertor.permission(entry.getValue(), t), t);
 				}
 			} else {
 				for (Permission p : pm.getPermissions()) {
-					ret.set(p.getName(), Convertor.permission(p, t), t);
+					ret.set(p.getName(), PermissionConvertor.permission(p, t), t);
 				}
 			}
 			return ret;
@@ -160,10 +90,10 @@ public class Permissions {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean overwrite = false;
 			if (args.length == 2) {
-				overwrite = Static.getBoolean(args[1], t);
+				overwrite = ArgumentValidation.getBooleanObject(args[1], t);
 			}
 			PluginManager pm = (PluginManager) Static.getServer().getPluginManager().getHandle();
-			Permission perm = Convertor.permission(args[0], t);
+			Permission perm = PermissionConvertor.permission(args[0], t);
 			if (overwrite) {
 				pm.removePermission(perm.getName());
 			}
@@ -188,9 +118,9 @@ public class Permissions {
 			return "void {permissionArray, overwrite} Registers a permission on the server. If overwrite is true,"
 					+ " any conflicting permissions will be unregistered. The permissionArray must include a 'name'"
 					+ " key containing the permission's name. Other keys can be 'default', 'description', and 'children'."
-					+ " Default can be one of " + StringUtils.Join(PermissionDefault.values(), ", ", ", or ")
-					+ ", but defaults to " + Permission.DEFAULT_PERMISSION + ". If description is not given,"
-					+ " it won't have one. Children must be null or an array of permission name keys and boolean values."
+					+ " Default can be one of TRUE, FALSE, OP, or NOT_OP, but defaults to OP."
+					+ " If description is not given, it won't have one."
+					+ " Children must be null or an array of permission name keys and boolean values."
 					+ " The values given will be the values of the child when the parent is set."
 					+ " This is the equivilent of setting permissions in the server permissions.yml.";
 		}
