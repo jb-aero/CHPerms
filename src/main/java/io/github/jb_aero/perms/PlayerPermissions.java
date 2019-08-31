@@ -3,9 +3,8 @@ package io.github.jb_aero.perms;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -21,29 +20,15 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.AbstractFunction;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class PlayerPermissions {
 
-	private static Map<String, PermissionAttachment> attachments = new HashMap<String, PermissionAttachment>();
-
-	public static PermissionAttachment getAttachment(Player player) {
-		if (!attachments.containsKey(player.getName())) {
-			attachments.put(player.getName(), player.addAttachment(CommandHelperPlugin.self));
-		}
-		return attachments.get(player.getName());
-	}
 
 	public abstract static class PlayerPermFunction extends AbstractFunction {
 		public Class<? extends CREThrowable>[] thrown() {
@@ -111,17 +96,14 @@ public class PlayerPermissions {
 					throw new CREPlayerOfflineException("Only players supported at this time", t);
 				}
 				perm = args[0].val();
-				value = Static.getBoolean(args[1], t);
+				value = ArgumentValidation.getBooleanObject(args[1], t);
 			} else {
 				mcs = Static.GetPlayer(args[0], t);
 				perm = args[1].val();
-				value = Static.getBoolean(args[2], t);
+				value = ArgumentValidation.getBooleanObject(args[2], t);
 			}
 			Player player = (Player) mcs.getHandle();
-			if (!attachments.containsKey(player.getName())) {
-				attachments.put(player.getName(), player.addAttachment(CommandHelperPlugin.self));
-			}
-			attachments.get(player.getName()).setPermission(perm, value);
+			AttachmentManager.getAttachment(player).setPermission(perm, value);
 			return CVoid.VOID;
 		}
 
@@ -158,29 +140,25 @@ public class PlayerPermissions {
 				cperms = Static.getArray(args[1], t);
 			}
 			Player player = (Player) mcs.getHandle();
-			if (!attachments.containsKey(player.getName())) {
-				attachments.put(player.getName(), player.addAttachment(CommandHelperPlugin.self));
-			}
-			PermissionAttachment attachment = attachments.get(player.getName());
 
 			Map<String, Boolean> perms = new LinkedHashMap<String, Boolean>();
 			for(String key : cperms.stringKeySet()) {
-				perms.put(key, Static.getBoolean(cperms.get(key, t), t));
+				perms.put(key, ArgumentValidation.getBooleanObject(cperms.get(key, t), t));
 			}
 
 			Map<String, Boolean> permissions;
 			try {
 				if (pField == null) {
-					pField = PermissionAttachment.class.getDeclaredField("permissions");
+					pField = AttachmentManager.ATTACHMENT_CLASS.getDeclaredField("permissions");
 					pField.setAccessible(true);
 				}
-				permissions = (Map<String, Boolean>) pField.get(attachment);
+				permissions = (Map<String, Boolean>) pField.get(AttachmentManager.getAttachment(player));
 			} catch (Exception e) {
 				throw new CREReadOnlyException("Error trying to make permissions accessible in attachment", t);
 			}
 			permissions.clear();
 			permissions.putAll(perms);
-			attachment.getPermissible().recalculatePermissions();
+			player.recalculatePermissions();
 			player.updateCommands();
 			return CVoid.VOID;
 		}
@@ -217,10 +195,7 @@ public class PlayerPermissions {
 				perm = args[1].val();
 			}
 			Player player = (Player) mcs.getHandle();
-			if (!attachments.containsKey(player.getName())) {
-				attachments.put(player.getName(), player.addAttachment(CommandHelperPlugin.self));
-			}
-			attachments.get(player.getName()).unsetPermission(perm);
+			AttachmentManager.getAttachment(player).unsetPermission(perm);
 			return CVoid.VOID;
 		}
 
@@ -243,9 +218,9 @@ public class PlayerPermissions {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String player = args[0].val();
 			boolean success = false;
-			if (attachments.containsKey(player)) {
-				success = attachments.get(player).remove();
-				attachments.remove(player);
+			if (AttachmentManager.getAttachments().containsKey(player)) {
+				success = AttachmentManager.getAttachments().get(player).remove();
+				AttachmentManager.getAttachments().remove(player);
 			}
 			return CBoolean.get(success);
 		}
@@ -266,30 +241,14 @@ public class PlayerPermissions {
 	@api
 	public static class hijack_permissions extends PlayerPermFunction {
 
-		private void hijack(Player pl) {
-			List<PermissionAttachment> checked = new ArrayList<PermissionAttachment>();
-			PermissionAttachment pla = getAttachment(pl);
-			for (PermissionAttachmentInfo pa : pl.getEffectivePermissions()) {
-				if (!checked.contains(pa.getAttachment())
-						&& pa.getAttachment().getPlugin() != CommandHelperPlugin.self) {
-					for (Map.Entry<String, Boolean> perm : pa.getAttachment().getPermissions().entrySet()) {
-						if (!pla.getPermissions().keySet().contains(perm.getKey())) {
-							pla.setPermission(perm.getKey(), perm.getValue());
-						}
-						pa.getAttachment().unsetPermission(perm.getKey());
-					}
-					pa.getAttachment().remove();
-				}
-				checked.add(pa.getAttachment());
-			}
-		}
+
 
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if (args.length == 1) {
-				hijack(((BukkitMCPlayer) Static.GetPlayer(args[0], t))._Player());
+				AttachmentManager.hijack(Static.GetPlayer(args[0], t));
 			} else {
-				for (Player pl : Bukkit.getServer().getOnlinePlayers()) {
-					hijack(pl);
+				for (MCPlayer pl : Static.getServer().getOnlinePlayers()) {
+					AttachmentManager.hijack(pl);
 				}
 			}
 			return CVoid.VOID;
