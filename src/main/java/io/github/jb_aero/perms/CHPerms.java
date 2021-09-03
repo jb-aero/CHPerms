@@ -2,8 +2,11 @@ package io.github.jb_aero.perms;
 
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.extensions.AbstractExtension;
 import com.laytonsmith.core.extensions.MSExtension;
+
+import java.util.logging.Level;
 
 @MSExtension("CHPerms")
 public class CHPerms extends AbstractExtension {
@@ -14,11 +17,11 @@ public class CHPerms extends AbstractExtension {
 
 	@Override
 	public void onStartup() {
-		System.out.println("CHPerms " + getVersion() + " loaded.");
+		Static.getLogger().log(Level.INFO, "CHPerms " + getVersion() + " loaded.");
 	}
 
 	@Override
 	public void onShutdown() {
-		System.out.println("CHPerms " + getVersion() + " unloaded.");
+		Static.getLogger().log(Level.INFO, "CHPerms " + getVersion() + " unloaded.");
 	}
 }
