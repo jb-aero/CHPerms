@@ -5,7 +5,7 @@ An implementation of the Bukkit permissions system, controlled by CommandHelper
 
 Download the correct version for your version of CommandHelper:
 <br>[CHPerms 3.0.0](https://letsbuild.net/jenkins/job/CHPerms/2/) (CommandHelper 3.3.3)
-<br>[CHPerms 3.0.1](https://letsbuild.net/jenkins/job/CHPerms/5/) (CommandHelper 3.3.4)
+<br>[CHPerms 3.0.2](https://letsbuild.net/jenkins/job/CHPerms/) (CommandHelper 3.3.4)
 
 PERMISSION FUNCTIONS
 =========

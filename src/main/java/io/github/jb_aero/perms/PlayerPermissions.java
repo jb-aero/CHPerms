@@ -134,10 +134,10 @@ public class PlayerPermissions {
 				if (!(mcs instanceof MCPlayer)) {
 					throw new CREPlayerOfflineException("Only players supported at this time", t);
 				}
-				cperms = Static.getArray(args[0], t);
+				cperms = ArgumentValidation.getArray(args[0], t);
 			} else {
 				mcs = Static.GetPlayer(args[0], t);
-				cperms = Static.getArray(args[1], t);
+				cperms = ArgumentValidation.getArray(args[1], t);
 			}
 			Player player = (Player) mcs.getHandle();
 
