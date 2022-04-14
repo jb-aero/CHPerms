@@ -12,7 +12,7 @@ import java.util.logging.Level;
 public class CHPerms extends AbstractExtension {
 
 	public Version getVersion() {
-		return new SimpleVersion(3, 0, 1);
+		return new SimpleVersion(3, 0, 2);
 	}
 
 	@Override
